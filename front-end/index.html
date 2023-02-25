@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>基于代码指标的软件缺陷预测</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+      /* 在这里添加您的自定义样式 */
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">基于代码指标的软件缺陷预测</h1>
+      <form>
+        <div class="form-group">
+          <label for="algorithm-select">选择算法</label>
+          <select class="form-control" id="algorithm-select">
+            <!-- 在这里添加算法选项 -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="repo-url">请输入仓库地址</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="repo-url" placeholder="https://github.com/username/repo.git">
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-primary" id="submit-btn">确认</button>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div id="loading-spinner" class="text-center" style="display:none;">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p>正在获取仓库，请稍候...</p>
+      </div>
+      <div id="error-message" class="text-center text-danger" style="display:none;">
+        <h2><i class="fas fa-exclamation-triangle"></i></h2>
+        <p id="error-detail"></p>
+      </div>
+      <div id="file-list" style="display:none;">
+        <h2>测试集文件列表</h2>
+        <ul class="list-group">
+          <!-- 在这里添加测试集文件列表 -->
+        </ul>
+      </div>
+      <div id="file-details" style="display:none;">
+        <h2>文件指标</h2>
+        <div id="file-details-content"></div>
+      </div>
+      <div id="result" style="display:none;">
+        <h2>测试结果</h2>
+        <p>准确率：<span id="accuracy"></span></p>
+        <p>F1值：<span id="f1-score"></span></p>
+        <!-- 在这里添加其他测试结果指标 -->
+      </div>
+    </div>
+    <script>
+        $(function() {
+          // Define algorithm options
+          const algorithms = [
+            { value: "lr", text: "Logistic Regression" },
+            { value: "svm", text: "Support Vector Machine" },
+            { value: "rf", text: "Random Forest" }
+          ];
+        
+          // Populate algorithm options
+          algorithms.forEach(function(algorithm) {
+            const option = $("<option>")
+              .val(algorithm.value)
+              .text(algorithm.text);
+            $("#algorithm-select").append(option);
+          });
+        
+          // Handle form submission
+          $("form").submit(function(event) {
+            event.preventDefault();
+        
+            // Get selected algorithm and repo URL
+            const algorithm = $("#algorithm-select").val();
+            const repoUrl = $("#repo-url").val();
+        
+            // Hide any existing messages or results
+            $("#error-message").hide();
+            $("#file-list").hide();
+            $("#file-details").hide();
+            $("#result").hide();
+        
+            // Show loading spinner
+            $("#loading-spinner").show();
+        
+            // Send data to server
+            $.ajax({
+              url: "http://1.15.220.141:4396/api/predict",
+              method: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({
+                algorithm: algorithm,
+                repoUrl: repoUrl
+              }),
+              success: function(response) {
+                // Hide loading spinner
+                $("#loading-spinner").hide();
+        
+                // Show file list
+                $("#file-list").show();
+        
+                // Populate file list
+                response.files.forEach(function(file) {
+                  const listItem = $("<li>")
+                    .addClass("list-group-item")
+                    .text(file);
+                  $("#file-list ul").append(listItem);
+                });
+
+                // Update accuracy and F1-score
+                $("#accuracy").text(response.accuracy);
+                $("#f1-score").text(response.f1_score);
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                // Hide loading spinner
+                $("#loading-spinner").hide();
+        
+                // Show error message
+                $("#error-detail").text(textStatus + ": " + errorThrown);
+                $("#error-message").show();
+              },
+              complete: function() {
+                // Hide loading spinner
+                $("#loading-spinner").hide();
+              }
+            });
+          });
+        });
+    </script>
+  </body>
+</html>
