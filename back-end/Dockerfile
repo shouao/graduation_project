@@ -9,6 +9,7 @@ COPY app.py .
 
 # 安装依赖项
 RUN pip install flask
+RUN pip install flask_cors
 
 # 设置环境变量
 ENV FLASK_APP=app.py
@@ -17,4 +18,4 @@ ENV FLASK_APP=app.py
 EXPOSE 4396
 
 # 启动应用程序
-CMD ["flask", "run", "--host", "0.0.0.0"]
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "4396"]

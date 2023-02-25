@@ -120,6 +120,7 @@
                 // Update accuracy and F1-score
                 $("#accuracy").text(response.accuracy);
                 $("#f1-score").text(response.f1_score);
+                $("#result").show();
               },
               error: function(jqXHR, textStatus, errorThrown) {
                 // Hide loading spinner
