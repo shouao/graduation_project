@@ -8,8 +8,7 @@ WORKDIR /app
 COPY app.py .
 
 # 安装依赖项
-RUN pip install flask
-RUN pip install flask_cors
+RUN pip install flask && pip install flask_cors && pip install gitpython
 
 # 设置环境变量
 ENV FLASK_APP=app.py
